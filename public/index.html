@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onsite Support — Sales Outreach Tool</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Syne:wght@600;700;800&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #f8f7f4;
+  --surface: #ffffff;
+  --surface2: #f2f1ee;
+  --border: #e5e3de;
+  --border2: #d0cec9;
+  --accent: #1a1a2e;
+  --accent2: #4f46e5;
+  --accent3: #7c3aed;
+  --text: #1a1a1a;
+  --muted: #6b6863;
+  --danger: #dc2626;
+  --success: #16a34a;
+  --warn: #d97706;
+  --sans: 'Inter', system-ui, sans-serif;
+  --display: 'Syne', sans-serif;
+}
+
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; min-height: 100vh; line-height: 1.6; }
+
+/* Layout */
+.app { display: grid; grid-template-columns: 260px 1fr; min-height: 100vh; }
+.sidebar { background: var(--accent); color: #fff; padding: 32px 24px; display: flex; flex-direction: column; gap: 8px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.main { padding: 40px 48px; max-width: 900px; }
+
+/* Sidebar */
+.sidebar-logo { font-family: var(--display); font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 32px; display: flex; align-items: center; gap: 10px; }
+.sidebar-logo span { color: #a5b4fc; }
+.sidebar-section { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #6366f1; margin: 20px 0 8px; font-weight: 600; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; color: #c7d2fe; transition: all 0.15s; font-weight: 500; border: none; background: transparent; width: 100%; text-align: left; }
+.nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+.nav-item.active { background: rgba(99,102,241,0.3); color: #fff; }
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+/* Rep profile */
+.rep-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; margin-top: auto; }
+.rep-card label { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: #6366f1; display: block; margin-bottom: 6px; }
+.rep-input { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 6px; color: #fff; font-family: var(--sans); font-size: 13px; padding: 8px 10px; width: 100%; outline: none; }
+.rep-input:focus { border-color: #6366f1; }
+.rep-input::placeholder { color: rgba(255,255,255,0.3); }
+
+/* Pages */
+.page { display: none; }
+.page.active { display: block; }
+
+/* Page header */
+.page-header { margin-bottom: 36px; }
+.page-title { font-family: var(--display); font-size: 30px; font-weight: 800; color: var(--text); line-height: 1.1; }
+.page-title span { color: var(--accent2); }
+.page-subtitle { color: var(--muted); margin-top: 6px; font-size: 14px; }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 20px; }
+.card-title { font-family: var(--display); font-size: 15px; font-weight: 700; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+.card-title .step { width: 24px; height: 24px; border-radius: 50%; background: var(--accent2); color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-family: var(--sans); flex-shrink: 0; }
+
+/* Form elements */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+label.field-label { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.05em; text-transform: uppercase; }
+input[type=text], input[type=email], textarea, select {
+  background: var(--surface2); border: 1.5px solid var(--border); border-radius: 10px;
+  color: var(--text); font-family: var(--sans); font-size: 14px; padding: 11px 14px;
+  outline: none; transition: all 0.15s; width: 100%;
+}
+input:focus, textarea:focus, select:focus { border-color: var(--accent2); background: #fff; box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
+textarea { resize: vertical; }
+select { cursor: pointer; }
+
+/* Email angle selector */
+.angle-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.angle-card { border: 2px solid var(--border); border-radius: 12px; padding: 14px 12px; cursor: pointer; transition: all 0.15s; text-align: center; }
+.angle-card:hover { border-color: var(--accent2); background: rgba(79,70,229,0.04); }
+.angle-card.selected { border-color: var(--accent2); background: rgba(79,70,229,0.06); }
+.angle-card .angle-icon { font-size: 22px; margin-bottom: 6px; }
+.angle-card .angle-name { font-size: 12px; font-weight: 600; color: var(--text); }
+.angle-card .angle-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.angle-card.selected .angle-name { color: var(--accent2); }
+
+/* Tone selector */
+.tone-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.tone-chip { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--muted); transition: all 0.15s; }
+.tone-chip:hover { border-color: var(--accent2); color: var(--accent2); }
+.tone-chip.selected { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 11px 22px; border-radius: 10px; font-family: var(--sans); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; letter-spacing: 0.01em; }
+.btn-primary { background: var(--accent2); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #4338ca; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(79,70,229,0.3); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--border2); color: var(--text); }
+.btn-ghost:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-danger { background: rgba(220,38,38,0.08); color: var(--danger); border: 1.5px solid rgba(220,38,38,0.2); }
+.btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 8px; }
+.btn-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+
+/* Email preview */
+.email-preview-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 16px; }
+.email-preview-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; background: var(--surface2); }
+.email-meta { flex: 1; }
+.email-to-line { font-size: 13px; font-weight: 600; color: var(--text); }
+.email-to-line span { color: var(--muted); font-weight: 400; }
+.email-subject-line { font-size: 13px; color: var(--accent2); margin-top: 3px; font-weight: 500; }
+.email-angle-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.badge-helpdesk { background: rgba(79,70,229,0.1); color: var(--accent2); }
+.badge-ai { background: rgba(124,58,237,0.1); color: var(--accent3); }
+.badge-returns { background: rgba(22,163,74,0.1); color: var(--success); }
+.badge-social { background: rgba(217,119,6,0.1); color: var(--warn); }
+.email-body-preview { padding: 20px; font-size: 13px; line-height: 1.8; color: var(--text); }
+.email-body-preview p { margin-bottom: 10px; }
+.email-body-preview a { color: var(--accent2); }
+.email-actions { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; background: var(--surface2); }
+
+/* Progress */
+.progress-bar { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent3)); border-radius: 2px; transition: width 0.4s ease; }
+.log-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 12px; color: var(--muted); max-height: 200px; overflow-y: auto; margin-top: 12px; font-family: monospace; line-height: 1.8; }
+.log-ok { color: var(--success); } .log-err { color: var(--danger); } .log-info { color: var(--accent2); }
+
+/* Upload zone */
+.upload-zone { border: 2px dashed var(--border2); border-radius: 12px; padding: 32px; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; }
+.upload-zone:hover, .upload-zone.drag { border-color: var(--accent2); background: rgba(79,70,229,0.03); }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.upload-zone .upload-icon { font-size: 32px; margin-bottom: 10px; }
+.upload-zone p { color: var(--muted); font-size: 13px; }
+.upload-zone strong { color: var(--accent2); }
+
+/* Stats row */
+.stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+.stat-box { background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 18px; flex: 1; min-width: 100px; }
+.stat-val { font-family: var(--display); font-size: 24px; font-weight: 800; color: var(--accent2); }
+.stat-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+/* Filter chips */
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.filter-chip { padding: 5px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--muted); transition: all 0.15s; font-family: var(--sans); font-weight: 500; }
+.filter-chip.active { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+
+/* Table */
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 10px 14px; color: var(--muted); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; border-bottom: 1px solid var(--border); font-weight: 600; background: var(--surface2); }
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(79,70,229,0.02); }
+
+/* Status badges */
+.status { display: inline-flex; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.status-queued { background: rgba(79,70,229,0.1); color: var(--accent2); }
+.status-drafted { background: rgba(22,163,74,0.1); color: var(--success); }
+.status-failed { background: rgba(220,38,38,0.1); color: var(--danger); }
+.status-generating { background: rgba(217,119,6,0.1); color: var(--warn); }
+
+/* Gmail connect */
+.gmail-connect { background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 16px; padding: 24px; color: #fff; display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 20px; }
+.gmail-connect-text h3 { font-family: var(--display); font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.gmail-connect-text p { font-size: 12px; color: rgba(255,255,255,0.6); }
+.gmail-status { font-size: 12px; color: #86efac; display: flex; align-items: center; gap: 6px; }
+.gmail-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
+
+/* Loading spinner */
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; display: inline-block; }
+.spinner-dark { border-color: rgba(79,70,229,0.2); border-top-color: var(--accent2); }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Alerts */
+.alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; display: flex; align-items: flex-start; gap: 10px; }
+.alert-info { background: rgba(79,70,229,0.08); border: 1px solid rgba(79,70,229,0.2); color: var(--accent2); }
+.alert-success { background: rgba(22,163,74,0.08); border: 1px solid rgba(22,163,74,0.2); color: var(--success); }
+.alert-warn { background: rgba(217,119,6,0.08); border: 1px solid rgba(217,119,6,0.2); color: var(--warn); }
+
+/* Regenerate tabs */
+.variation-tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 0; }
+.var-tab { padding: 10px 18px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--muted); transition: all 0.15s; }
+.var-tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { height: auto; position: relative; }
+  .main { padding: 24px 20px; }
+  .angle-grid { grid-template-columns: 1fr 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <span>✦</span> Onsite <span style="color:#fff">Outreach</span>
+    </div>
+
+    <div class="sidebar-section">Modes</div>
+    <button class="nav-item active" onclick="showPage('single')">
+      <span class="icon">✉</span> Single Lead
+    </button>
+    <button class="nav-item" onclick="showPage('bulk')">
+      <span class="icon">⚡</span> Bulk Campaign
+    </button>
+
+    <div class="sidebar-section">History</div>
+    <button class="nav-item" onclick="showPage('history')">
+      <span class="icon">📋</span> Sent Drafts
+    </button>
+
+    <div class="rep-card">
+      <label>Your Name</label>
+      <input type="text" class="rep-input" id="repName" placeholder="e.g. Sarah Chen" value="">
+      <div style="margin-top:10px;">
+        <label>Your Title</label>
+        <input type="text" class="rep-input" id="repTitle" placeholder="e.g. Account Executive" value="">
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── SINGLE LEAD PAGE ── -->
+    <div class="page active" id="page-single">
+      <div class="page-header">
+        <div class="page-title">Single <span>Lead</span></div>
+        <div class="page-subtitle">Research a company, generate a personalized email, copy and send from your Gmail</div>
+      </div>
+      <div class="alert alert-info" style="margin-bottom:20px;">
+        ✦ <strong>How it works:</strong> Fill in the lead details → pick your angle → hit Generate → copy the email → paste into Gmail and send. Fast, no login required.
+      </div>
+
+
+
+      <!-- Lead details -->
+      <div class="card">
+        <div class="card-title"><div class="step">1</div> Lead Details</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="field-label">First Name</label>
+            <input type="text" id="leadFirstName" placeholder="e.g. Jane">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Last Name</label>
+            <input type="text" id="leadLastName" placeholder="e.g. Smith">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Email Address</label>
+            <input type="email" id="leadEmail" placeholder="jane@company.com">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Job Title</label>
+            <input type="text" id="leadTitle" placeholder="e.g. Head of Customer Support">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Company Name</label>
+            <input type="text" id="leadCompany" placeholder="e.g. Acme Store">
+          </div>
+          <div class="form-group">
+            <label class="field-label">Website URL</label>
+            <input type="text" id="leadWebsite" placeholder="https://www.theirstore.com">
+          </div>
+        </div>
+      </div>
+
+      <!-- Email angle -->
+      <div class="card">
+        <div class="card-title"><div class="step">2</div> Email Angle</div>
+        <div class="angle-grid">
+          <div class="angle-card selected" data-angle="helpdesk" onclick="selectAngle(this)">
+            <div class="angle-icon">🏪</div>
+            <div class="angle-name">Helpdesk</div>
+            <div class="angle-desc">Features & full platform</div>
+          </div>
+          <div class="angle-card" data-angle="ai" onclick="selectAngle(this)">
+            <div class="angle-icon">🤖</div>
+            <div class="angle-name">AI</div>
+            <div class="angle-desc">AI capabilities & automation</div>
+          </div>
+          <div class="angle-card" data-angle="returns" onclick="selectAngle(this)">
+            <div class="angle-icon">📦</div>
+            <div class="angle-name">Returns</div>
+            <div class="angle-desc">Reduce returns & bad reviews</div>
+          </div>
+          <div class="angle-card" data-angle="social" onclick="selectAngle(this)">
+            <div class="angle-icon">⭐</div>
+            <div class="angle-name">Social Proof</div>
+            <div class="angle-desc">Case studies & results</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tone & Notes -->
+      <div class="card">
+        <div class="card-title"><div class="step">3</div> Tone & Notes</div>
+        <div class="form-group" style="margin-bottom:16px;">
+          <label class="field-label">Tone</label>
+          <div class="tone-chips">
+            <button class="tone-chip selected" data-tone="warm-peer">Warm & Peer-to-peer</button>
+            <button class="tone-chip" data-tone="professional">Professional</button>
+            <button class="tone-chip" data-tone="direct">Direct & Brief</button>
+            <button class="tone-chip" data-tone="consultative">Consultative</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Rep Notes <span style="text-transform:none;font-weight:400;color:var(--muted)">(optional — anything specific to include, avoid, or angle toward)</span></label>
+          <textarea id="repNotes" rows="3" placeholder="e.g. They mentioned they're unhappy with their current AI. Focus on order data integration. Spoke at a conference last week about returns…"></textarea>
+        </div>
+      </div>
+
+      <!-- Generate -->
+      <div class="btn-row" style="margin-top:0">
+        <button class="btn btn-primary" id="generateSingleBtn" onclick="generateSingle()">
+          🔍 Research &amp; Generate Email
+        </button>
+        <span id="singleStatus" style="font-size:13px;color:var(--muted);"></span>
+      </div>
+
+      <!-- Results -->
+      <div id="singleResults" style="display:none;margin-top:32px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+          <div style="font-family:var(--display);font-size:16px;font-weight:700;">Generated Email</div>
+          <button class="btn btn-ghost btn-sm" onclick="generateSingle()">↺ Regenerate</button>
+        </div>
+        <div id="singleEmailPreview"></div>
+      </div>
+    </div>
+
+    <!-- ── BULK PAGE ── -->
+    <div class="page" id="page-bulk">
+      <div class="page-header">
+        <div class="page-title">Bulk <span>Campaign</span></div>
+        <div class="page-subtitle">Upload a CSV/Excel list, pick your angle, generate and draft at scale</div>
+      </div>
+
+      <!-- Upload -->
+      <div class="card">
+        <div class="card-title"><div class="step">1</div> Upload Lead List</div>
+        <div class="upload-zone" id="bulkDropZone">
+          <input type="file" id="bulkFileInput" accept=".xlsx,.xls,.csv">
+          <div class="upload-icon">⇪</div>
+          <p><strong>Drop your CSV or Excel file here</strong> or click to browse</p>
+          <p style="margin-top:4px;font-size:12px;">Columns: Name, Email, Company, Website, Title (optional)</p>
+        </div>
+        <div id="bulkFileStats" style="display:none;margin-top:16px;">
+          <div class="stats-row" id="bulkStatsRow"></div>
+          <div class="filter-row" id="bulkFilterRow"></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Name</th><th>Company</th><th>Email</th><th>Status</th></tr></thead>
+              <tbody id="bulkPreviewBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bulk config -->
+      <div class="card" id="bulkConfigCard" style="display:none;">
+        <div class="card-title"><div class="step">2</div> Campaign Settings</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="field-label">Email Angle</label>
+            <select id="bulkAngle">
+              <option value="helpdesk">🏪 Helpdesk Features</option>
+              <option value="ai">🤖 AI Capabilities</option>
+              <option value="returns">📦 Returns Reduction</option>
+              <option value="social">⭐ Social Proof (Case Studies)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">Tone</label>
+            <select id="bulkTone">
+              <option value="warm-peer">Warm & Peer-to-peer</option>
+              <option value="professional">Professional</option>
+              <option value="direct">Direct & Brief</option>
+              <option value="consultative">Consultative</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="field-label">Batch Size</label>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <input type="range" id="bulkBatchSize" min="1" max="50" value="20" style="flex:1;accent-color:var(--accent2);">
+              <span id="bulkBatchVal" style="color:var(--accent2);font-weight:700;min-width:28px;">20</span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="field-label">Research each brand?</label>
+            <select id="bulkResearch">
+              <option value="yes">Yes — AI researches each website (slower, more personalized)</option>
+              <option value="no">No — use company name only (faster)</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="field-label">Campaign Notes</label>
+            <textarea id="bulkNotes" rows="2" placeholder="e.g. Focus on multi-marketplace sellers. Mention free migration…"></textarea>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="startBulkBtn" onclick="startBulk()">⚡ Generate &amp; Draft All</button>
+          <button class="btn btn-ghost btn-sm" id="previewBulkBtn" onclick="previewBulkSample()">⚡ Preview sample</button>
+          <button class="btn btn-ghost btn-sm" id="stopBulkBtn" style="display:none;color:var(--danger);border-color:rgba(220,38,38,0.3);" onclick="stopBulk()">⏹ Stop</button>
+        </div>
+      </div>
+
+      <!-- Bulk progress -->
+      <div id="bulkProgress" style="display:none;" class="card">
+        <div class="card-title">Progress</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div id="bulkStatusText" style="font-size:13px;color:var(--muted);">Starting…</div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" id="bulkProgressFill" style="width:0%"></div></div>
+        <div class="log-box" id="bulkLog"></div>
+
+        <!-- Recovery -->
+        <div style="margin-top:14px;padding:12px 16px;background:rgba(217,119,6,0.06);border:1px solid rgba(217,119,6,0.2);border-radius:10px;">
+          <div style="font-size:12px;color:var(--warn);margin-bottom:8px;font-weight:600;">⚠ Frozen or stopped? Recover:</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn btn-ghost btn-sm" onclick="markBulkDrafted()">✓ Mark drafted as done</button>
+            <button class="btn btn-ghost btn-sm" onclick="resetBulkRun()" style="color:var(--accent2);border-color:rgba(79,70,229,0.3);">↺ Continue from here</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bulk results -->
+      <div id="bulkResults" style="display:none;margin-top:20px;">
+        <div class="card">
+          <div class="card-title">Results</div>
+          <div class="stats-row" id="bulkResultStats"></div>
+          <div id="bulkResultPreviews"></div>
+          <div id="bulkContinueBar" style="display:none;margin-top:16px;padding:14px;background:rgba(79,70,229,0.06);border:1px solid rgba(79,70,229,0.2);border-radius:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;">
+            <span id="bulkContinueMsg" style="font-size:13px;color:var(--muted);"></span>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-primary btn-sm" onclick="continueBulk()">▶ Continue next batch</button>
+              <button class="btn btn-ghost btn-sm" onclick="document.getElementById('bulkContinueBar').style.display='none'">Done for now</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── HISTORY PAGE ── -->
+    <div class="page" id="page-history">
+      <div class="page-header">
+        <div class="page-title">Sent <span>Drafts</span></div>
+        <div class="page-subtitle">All emails generated this session</div>
+      </div>
+      <div id="historyContent">
+        <div style="text-align:center;padding:60px 20px;color:var(--muted);">
+          <div style="font-size:48px;margin-bottom:12px;opacity:0.3;">📋</div>
+          <div style="font-size:15px;">No drafts yet this session</div>
+          <div style="font-size:13px;margin-top:4px;">Generate emails from Single Lead or Bulk Campaign</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────────────────────────
+let selectedAngle = 'helpdesk';
+let selectedTone = 'warm-peer';
+let bulkContacts = [], bulkFiltered = [], bulkGenerated = [];
+let bulkStopRequested = false;
+let sessionHistory = [];
+// Web version — no API key needed
+
+const BOOKING_LINK = 'https://threecolts.chilipiper.com/me/isaac-hadriye/meeting-with-ihadriye';
+const ONSITE_URL = 'https://onsitesupport.io/';
+// Gmail handled by Claude app version
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(page)) n.classList.add('active');
+  });
+  if (page === 'history') renderHistory();
+}
+
+// No API token needed — web version uses Claude artifact
+
+function getApiHeaders() {
+  return { 'Content-Type': 'application/json' };
+}
+
+// ── Angle & Tone selectors ─────────────────────────────────────────────────
+function selectAngle(el) {
+  document.querySelectorAll('.angle-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedAngle = el.dataset.angle;
+}
+
+document.querySelectorAll('.tone-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('.tone-chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+    selectedTone = chip.dataset.tone;
+  });
+});
+
+document.getElementById('bulkBatchSize').addEventListener('input', e => {
+  document.getElementById('bulkBatchVal').textContent = e.target.value;
+});
+
+// ── Prompt Builder ─────────────────────────────────────────────────────────
+function buildAnglePrompt(angle, company, name, researchContext) {
+  const angles = {
+    helpdesk: `Focus: Onsite Support as a full standalone helpdesk built exclusively for ecommerce.
+Key points: replaces their current helpdesk completely, all marketplace data (Amazon, eBay, Walmart, Shopify, WooCommerce, and 10+ more) visible inside every ticket, no tab switching, automated SLA rules, smart tagging, canned responses with real order data, white-glove migration — smooth and fast.
+Hook: Position it as the only helpdesk built from the ground up for how ecommerce actually works.`,
+
+    ai: `Focus: Onsite Support's AI capabilities — what makes it different from generic AI.
+Key points: AI trained on the merchant's OWN order data, company policies, and product knowledge base — not generic AI. Resolves tickets automatically. AI chatbots that answer product-specific questions instantly (fitment, troubleshooting, order tracking, returns). AI assist for agents that drafts responses automatically. 500 AI conversations included free for the first year.
+Hook: Their current helpdesk's AI is guessing. Ours already knows the order, the product, and the policy.`,
+
+    returns: `Focus: Reducing returns and bad reviews through better customer support.
+Key points: When a customer is frustrated, fast accurate support prevents the return and the 1-star review. Onsite's AI uses live order data to respond instantly — no wait, no frustration. ChannelReply data is already there so the AI knows the order immediately. Customers who get help don't leave bad reviews.
+Hook: Bad reviews aren't about bad products. They're about slow responses — and that's fixable.`,
+
+    social: `Focus: Social proof — real results from real customers.
+Use these case studies, pick the most relevant ONE as the lead based on the company's industry, then mention the other two briefly:
+- MIKO (health/wellness tech): 96% jump in support efficiency, nearly doubled ticket volume with same team
+- LUMINESS (beauty/cosmetics brand): 40% fewer returns, 20% drop in negative reviews in 4 months
+- SOJOURN CONSULTING (ecommerce agency, multi-marketplace): 3.8x more tickets with same team, chose Onsite specifically for ChannelReply integration
+Pick: tech/parts/electronics → Miko. Beauty/lifestyle/fashion → Luminess. Agency/high-volume/multi-marketplace → Sojourn.
+Hook: Other ChannelReply sellers have already made the switch — here's what happened.`
+  };
+
+  const tones = {
+    'warm-peer': 'Warm and peer-to-peer. Write like a colleague reaching out, not a sales rep. Conversational, confident, genuine.',
+    'professional': 'Professional and polished. Respectful, clear, well-structured. Still personal but more formal.',
+    'direct': 'Direct and brief. Get to the point fast. No fluff. Short sentences. Respect their time.',
+    'consultative': 'Consultative. Ask a question or acknowledge their likely situation. Position yourself as solving a specific problem they have.'
+  };
+
+  return `You are writing a cold outreach email on behalf of a sales rep at Threecolts, pitching Onsite Support (onsitesupport.io) to a cold lead.
+
+IMPORTANT — This is a COLD lead. They do NOT know about Onsite Support. Do NOT open with "Since you're using ChannelReply" — instead, open with something relevant to their business or a compelling hook related to the angle below.
+
+About Onsite Support:
+- Full standalone ecommerce helpdesk — complete replacement, not an add-on
+- ChannelReply built in (connects Amazon, eBay, Walmart, Shopify, WooCommerce, Etsy, Newegg, Back Market, TikTok Shop and 10+ more)
+- AI trained on merchant's own order data, policies, and product knowledge base
+- White-glove migration — free data migration from any helpdesk
+- $299/month — 3 agents + unlimited marketplaces + AI included
+
+EMAIL ANGLE:
+${angles[angle]}
+
+TONE:
+${tones[selectedTone] || tones['warm-peer']}
+
+${researchContext ? `COMPANY RESEARCH (use this to personalize — mention their specific products or support challenges):\n${researchContext}\n` : ''}
+
+Rep signing this email: {REP_NAME}, {REP_TITLE} at Threecolts
+
+Recipient: ${name}, ${company}
+
+Instructions:
+- 90-130 words body (not counting signature)
+- Do NOT name any competitor helpdesk
+- No PLS mention
+- Include ONE specific use case relevant to their business
+- CTA: soft, one line — e.g. "Worth a quick look? <a href="${BOOKING_LINK}">Grab 20 minutes here.</a>"
+- Signature: <p>{REP_NAME}<br>{REP_TITLE}<br>Threecolts | <a href="${ONSITE_URL}">Onsite Support</a><br><a href="${BOOKING_LINK}">Book a meeting</a></p>
+
+Return ONLY raw JSON — no markdown, no code fences:
+{"subject": "...", "body": "..."}
+Body must be HTML with <p> tags and <a href> for links. No raw URLs.`;
+}
+
+// ── API call ───────────────────────────────────────────────────────────────
+async function callAI(prompt, maxTokens = 1200) {
+  const timeout = new Promise((_, r) => setTimeout(() => r(new Error('Request timed out')), 35000));
+  const req = fetch('/api/claude', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] })
+  });
+  const resp = await Promise.race([req, timeout]);
+  if (!resp.ok) throw new Error(`API error ${resp.status}`);
+  const data = await resp.json();
+  return data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+}
+
+async function researchCompany(website, company) {
+  if (!website) return '';
+  const prompt = `Research this ecommerce business: ${website} (${company}).
+Find: (1) what products they sell specifically, (2) which marketplaces they sell on, (3) what customer support challenges their shoppers likely have (fitment, troubleshooting, order tracking, returns, product questions).
+Return 3-4 sentences, very specific. Lead with their products and marketplaces.`;
+  try {
+    const resp = await fetch('/api/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 600,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    return data.content.filter(b => b.type === 'text').map(b => b.text).join(' ');
+  } catch(e) { return ''; }
+}
+
+function safeParseEmail(raw) {
+  const text = raw.replace(/```json|```/g, '').trim();
+  try { const p = JSON.parse(text); if (p.subject && p.body) return p; } catch(e) {}
+  try {
+    const sIdx = text.indexOf('"subject"'), bIdx = text.indexOf('"body"');
+    if (sIdx > -1 && bIdx > -1) {
+      const afterSub = text.slice(sIdx + 9).replace(/^\s*:\s*"/, '');
+      const subject = afterSub.slice(0, afterSub.indexOf('",'));
+      const afterBody = text.slice(bIdx + 6).replace(/^\s*:\s*"/, '');
+      const body = afterBody.slice(0, afterBody.lastIndexOf('"'));
+      if (subject && body) return { subject, body };
+    }
+  } catch(e) {}
+  const subMatch = /"subject"\s*:\s*"([^"]+)"/.exec(text);
+  const bodyStart = text.indexOf('"body"');
+  if (subMatch && bodyStart > -1) {
+    const afterBody = text.slice(bodyStart + 6).replace(/^\s*:\s*"/, '');
+    const body = afterBody.slice(0, afterBody.lastIndexOf('"'));
+    if (body.length > 10) return { subject: subMatch[1], body };
+  }
+  throw new Error('Could not parse email response');
+}
+
+function injectRepInfo(emailBody, subject) {
+  const repName = document.getElementById('repName').value.trim() || 'Your Name';
+  const repTitle = document.getElementById('repTitle').value.trim() || 'Sales Representative';
+  return {
+    subject: subject.replace(/{REP_NAME}/g, repName).replace(/{REP_TITLE}/g, repTitle),
+    body: emailBody.replace(/{REP_NAME}/g, repName).replace(/{REP_TITLE}/g, repTitle)
+  };
+}
+
+// Gmail draft handled by Claude app version
+
+// ── Angle badge ────────────────────────────────────────────────────────────
+function angleBadge(angle) {
+  const map = {
+    helpdesk: ['badge-helpdesk', '🏪 Helpdesk'],
+    ai: ['badge-ai', '🤖 AI'],
+    returns: ['badge-returns', '📦 Returns'],
+    social: ['badge-social', '⭐ Social Proof']
+  };
+  const [cls, label] = map[angle] || ['badge-helpdesk', angle];
+  return `<span class="email-angle-badge ${cls}">${label}</span>`;
+}
+
+function renderEmailPreview(email, angle, showActions = true, idx = 0) {
+  const actions = showActions ? `
+    <div class="email-actions">
+      <button class="btn btn-primary btn-sm" onclick="copyEmailBody(${idx})">📋 Copy email</button>
+      <button class="btn btn-ghost btn-sm" onclick="copySubject(${idx})">Copy subject</button>
+      <span id="emailActionStatus${idx}" style="font-size:12px;color:var(--muted);margin-left:4px;"></span>
+    </div>` : '';
+  return `
+    <div class="email-preview-card" id="emailCard${idx}">
+      <div class="email-preview-header">
+        <div class="email-meta">
+          <div class="email-to-line">${esc(email.to_name)} <span>&lt;${esc(email.to_email)}&gt;</span> · <span>${esc(email.company)}</span></div>
+          <div class="email-subject-line">${esc(email.subject)}</div>
+        </div>
+        ${angleBadge(angle)}
+      </div>
+      <div class="email-body-preview">${email.body}</div>
+      ${actions}
+    </div>`;
+}
+
+// ── Single lead ────────────────────────────────────────────────────────────
+let currentSingleEmail = null;
+
+async function generateSingle() {
+  const firstName = document.getElementById('leadFirstName').value.trim();
+  const lastName = document.getElementById('leadLastName').value.trim();
+  const email = document.getElementById('leadEmail').value.trim();
+  const company = document.getElementById('leadCompany').value.trim();
+  const title = document.getElementById('leadTitle').value.trim();
+  const website = document.getElementById('leadWebsite').value.trim();
+  const notes = document.getElementById('repNotes').value.trim();
+  const name = [firstName, lastName].filter(Boolean).join(' ');
+
+  if (!name || !email || !company) {
+    document.getElementById('singleStatus').style.color = 'var(--danger)';
+    document.getElementById('singleStatus').textContent = 'Please fill in name, email, and company.';
+    return;
+  }
+
+  const btn = document.getElementById('generateSingleBtn');
+  const statusEl = document.getElementById('singleStatus');
+  btn.disabled = true;
+  statusEl.style.color = 'var(--muted)';
+  statusEl.textContent = website ? '🔍 Researching their business…' : '✍️ Writing email…';
+
+  try {
+    let research = '';
+    if (website) {
+      research = await researchCompany(website, company);
+      statusEl.textContent = '✍️ Writing personalized email…';
+    }
+
+    const angle = selectedAngle;
+    const tone = selectedTone;
+    const fullNotes = [notes, research ? `Company research: ${research}` : ''].filter(Boolean).join('\n\n');
+    let prompt = buildAnglePrompt(angle, company, `${name}${title ? ', ' + title : ''}`, fullNotes);
+    if (notes) prompt += `\n\nAdditional rep notes: ${notes}`;
+
+    const raw = await callAI(prompt);
+    let parsed = safeParseEmail(raw);
+    parsed = injectRepInfo(parsed.body, parsed.subject);
+
+    currentSingleEmail = { ...parsed, to_name: name, to_email: email, company, angle };
+
+    document.getElementById('singleResults').style.display = 'block';
+    document.getElementById('singleEmailPreview').innerHTML = renderEmailPreview(currentSingleEmail, angle, true, 0);
+
+    statusEl.style.color = 'var(--success)';
+    statusEl.textContent = '✓ Email ready';
+
+    // Add to history
+    sessionHistory.unshift({ ...currentSingleEmail, generatedAt: new Date().toLocaleTimeString() });
+
+  } catch(err) {
+    statusEl.style.color = 'var(--danger)';
+    statusEl.textContent = '✗ Error: ' + err.message;
+  }
+  btn.disabled = false;
+}
+
+function getEmailByIdx(idx) {
+  if (idx === 0) return currentSingleEmail;
+  if (idx === -1) return null;
+  return bulkGenerated[idx] || null;
+}
+
+function copyEmailBody(idx) {
+  const email = getEmailByIdx(idx);
+  if (!email) return;
+  // Strip HTML tags for plain text copy
+  const tmp = document.createElement('div');
+  tmp.innerHTML = email.body;
+  const plain = tmp.innerText;
+  navigator.clipboard.writeText(plain).then(() => {
+    const statusEl = document.getElementById('emailActionStatus' + idx);
+    statusEl.style.color = 'var(--success)';
+    statusEl.textContent = '✓ Copied to clipboard!';
+    setTimeout(() => { statusEl.textContent = ''; }, 2500);
+  }).catch(() => {
+    // Fallback for browsers that don't support clipboard API
+    const ta = document.createElement('textarea');
+    ta.value = plain;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    const statusEl = document.getElementById('emailActionStatus' + idx);
+    statusEl.style.color = 'var(--success)';
+    statusEl.textContent = '✓ Copied!';
+    setTimeout(() => { statusEl.textContent = ''; }, 2500);
+  });
+}
+
+function copySubject(idx) {
+  const email = getEmailByIdx(idx);
+  if (!email) return;
+  navigator.clipboard.writeText(email.subject).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = email.subject;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+  const statusEl = document.getElementById('emailActionStatus' + idx);
+  statusEl.style.color = 'var(--success)';
+  statusEl.textContent = '✓ Subject copied!';
+  setTimeout(() => { statusEl.textContent = ''; }, 2500);
+}
+
+// ── Bulk upload ────────────────────────────────────────────────────────────
+const bulkDropZone = document.getElementById('bulkDropZone');
+const bulkFileInput = document.getElementById('bulkFileInput');
+bulkDropZone.addEventListener('dragover', e => { e.preventDefault(); bulkDropZone.classList.add('drag'); });
+bulkDropZone.addEventListener('dragleave', () => bulkDropZone.classList.remove('drag'));
+bulkDropZone.addEventListener('drop', e => { e.preventDefault(); bulkDropZone.classList.remove('drag'); handleBulkFile(e.dataTransfer.files[0]); });
+bulkFileInput.addEventListener('change', e => handleBulkFile(e.target.files[0]));
+
+function handleBulkFile(file) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, { type: 'array' });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const raw = XLSX.utils.sheet_to_json(ws, { defval: '' });
+    bulkContacts = raw.map(r => ({
+      name: (r['Name'] || r['FullName'] || r['Full Name'] || (r['First Name'] || '') + ' ' + (r['Last Name'] || '')).trim(),
+      email: (r['Email'] || r['Direct Email'] || '').trim(),
+      company: (r['Company'] || r['Company Name'] || '').trim(),
+      website: (r['Website'] || r['URL'] || '').trim(),
+      title: (r['Title'] || r['Job Title'] || '').trim(),
+      status: 'queued'
+    })).filter(r => r.name && r.email && r.company);
+
+    bulkFiltered = [...bulkContacts];
+    renderBulkStats();
+    renderBulkTable();
+    document.getElementById('bulkFileStats').style.display = 'block';
+    document.getElementById('bulkConfigCard').style.display = 'block';
+    const max = document.getElementById('bulkBatchSize');
+    max.max = Math.min(50, bulkContacts.length);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function renderBulkStats() {
+  const queued = bulkFiltered.filter(c => c.status === 'queued').length;
+  const drafted = bulkFiltered.filter(c => c.status === 'drafted').length;
+  document.getElementById('bulkStatsRow').innerHTML = `
+    <div class="stat-box"><div class="stat-val">${bulkContacts.length}</div><div class="stat-lbl">Total</div></div>
+    <div class="stat-box"><div class="stat-val">${queued}</div><div class="stat-lbl">Queued</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:var(--success)">${drafted}</div><div class="stat-lbl">Drafted</div></div>`;
+}
+
+function renderBulkTable() {
+  document.getElementById('bulkPreviewBody').innerHTML = bulkFiltered.slice(0, 30).map(c => `
+    <tr>
+      <td style="font-weight:500">${esc(c.name)}</td>
+      <td style="color:var(--muted)">${esc(c.company)}</td>
+      <td style="color:var(--accent2)">${esc(c.email)}</td>
+      <td><span class="status status-${c.status}">${c.status}</span></td>
+    </tr>`).join('');
+}
+
+// ── Bulk campaign ──────────────────────────────────────────────────────────
+async function previewBulkSample() {
+  const queue = bulkFiltered.filter(c => c.status === 'queued');
+  if (queue.length === 0) { alert('No contacts queued.'); return; }
+  const btn = document.getElementById('previewBulkBtn');
+  btn.disabled = true; btn.textContent = '⏳ Generating…';
+  const contact = queue[0];
+  const angle = document.getElementById('bulkAngle').value;
+  const notes = document.getElementById('bulkNotes').value.trim();
+  const doResearch = document.getElementById('bulkResearch').value === 'yes';
+  try {
+    let research = doResearch ? await researchCompany(contact.website, contact.company) : '';
+    const prompt = buildAnglePrompt(angle, contact.company, contact.name + (contact.title ? ', ' + contact.title : ''), [notes, research].filter(Boolean).join('\n'));
+    const raw = await callAI(prompt);
+    let parsed = safeParseEmail(raw);
+    parsed = injectRepInfo(parsed.body, parsed.subject);
+    const email = { ...parsed, to_name: contact.name, to_email: contact.email, company: contact.company, angle };
+    document.getElementById('bulkResults').style.display = 'block';
+    document.getElementById('bulkResultStats').innerHTML = '';
+    document.getElementById('bulkResultPreviews').innerHTML = `<div style="font-size:12px;color:var(--muted);margin-bottom:12px;font-weight:600;">SAMPLE PREVIEW — not sent</div>` + renderEmailPreview(email, angle, false, -1);
+  } catch(err) { alert('Error: ' + err.message); }
+  btn.disabled = false; btn.textContent = '⚡ Preview sample';
+}
+
+async function startBulk() {
+  const queue = bulkFiltered.filter(c => c.status === 'queued');
+  const batchSize = parseInt(document.getElementById('bulkBatchSize').value) || 20;
+  const batch = queue.slice(0, batchSize);
+  if (batch.length === 0) { alert('No contacts queued!'); return; }
+
+  const angle = document.getElementById('bulkAngle').value;
+  const notes = document.getElementById('bulkNotes').value.trim();
+  const doResearch = document.getElementById('bulkResearch').value === 'yes';
+  bulkStopRequested = false; bulkGenerated = [];
+
+  document.getElementById('bulkProgress').style.display = 'block';
+  document.getElementById('bulkProgress').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('startBulkBtn').disabled = true;
+  document.getElementById('stopBulkBtn').style.display = 'inline-flex';
+  document.getElementById('bulkResults').style.display = 'none';
+  document.getElementById('bulkLog').innerHTML = '';
+  document.getElementById('bulkProgressFill').style.width = '0%';
+
+  const log = msg => { document.getElementById('bulkLog').innerHTML += `<div>${msg}</div>`; document.getElementById('bulkLog').scrollTop = 9999; };
+  log(`<span class="log-info">▸ Starting bulk — ${batch.length} leads — angle: ${angle}</span>`);
+
+  let ok = 0, failed = 0;
+
+  for (let i = 0; i < batch.length; i++) {
+    if (bulkStopRequested) { log(`<span class="log-info">⏹ Stopped at ${i}. ${ok} drafted.</span>`); break; }
+    const contact = batch[i];
+    document.getElementById('bulkProgressFill').style.width = Math.round(i / batch.length * 100) + '%';
+    document.getElementById('bulkStatusText').textContent = `Processing ${i + 1} / ${batch.length}…`;
+    contact.status = 'generating';
+    log(`Generating for <strong>${esc(contact.name)}</strong> (${esc(contact.company)})…`);
+
+    try {
+      let research = doResearch && contact.website ? await researchCompany(contact.website, contact.company) : '';
+      const prompt = buildAnglePrompt(angle, contact.company, contact.name + (contact.title ? ', ' + contact.title : ''), [notes, research].filter(Boolean).join('\n'));
+      const raw = await callAI(prompt);
+      let parsed = safeParseEmail(raw);
+      parsed = injectRepInfo(parsed.body, parsed.subject);
+      const email = { ...parsed, to_name: contact.name, to_email: contact.email, company: contact.company, angle, drafted: false };
+      bulkGenerated.push(email);
+      sessionHistory.unshift({ ...email, generatedAt: new Date().toLocaleTimeString() });
+
+      contact.status = 'drafted';
+      email.drafted = true;
+      log(`<span class="log-ok">✓ ${esc(contact.name)}</span> <span class="log-ok">✓ Ready to copy</span>`);
+      ok++;
+    } catch(err) {
+      contact.status = 'queued';
+      log(`<span class="log-err">✗ ${esc(contact.name)}: ${err.message}</span>`);
+      failed++;
+    }
+    renderBulkTable();
+    await sleep(600);
+  }
+
+  document.getElementById('bulkProgressFill').style.width = '100%';
+  document.getElementById('stopBulkBtn').style.display = 'none';
+  document.getElementById('startBulkBtn').disabled = false;
+  document.getElementById('startBulkBtn').textContent = '↺ Run again';
+  document.getElementById('bulkStatusText').innerHTML = `<span style="color:var(--success)">✓ Done — ${ok} generated${failed ? `, ${failed} failed` : ''}</span>`;
+  renderBulkStats();
+
+  if (bulkGenerated.length > 0) {
+    document.getElementById('bulkResults').style.display = 'block';
+    document.getElementById('bulkResultStats').innerHTML = `
+      <div class="stat-box"><div class="stat-val">${ok}</div><div class="stat-lbl">Generated</div></div>
+      <div class="stat-box"><div class="stat-val" style="color:var(--success)">${ok}</div><div class="stat-lbl">Ready to Copy</div></div>
+      <div class="stat-box"><div class="stat-val" style="color:var(--danger)">${failed}</div><div class="stat-lbl">Failed</div></div>`;
+    document.getElementById('bulkResultPreviews').innerHTML = bulkGenerated.map((e, i) => renderEmailPreview(e, e.angle, true, i)).join('');
+    document.getElementById('bulkResults').scrollIntoView({ behavior: 'smooth' });
+
+    const remaining = bulkFiltered.filter(c => c.status === 'queued').length;
+    if (remaining > 0) {
+      const bar = document.getElementById('bulkContinueBar');
+      bar.style.display = 'flex';
+      document.getElementById('bulkContinueMsg').innerHTML = `<strong style="color:var(--accent2)">${remaining}</strong> contacts still queued.`;
+    }
+  }
+}
+
+function stopBulk() { bulkStopRequested = true; document.getElementById('stopBulkBtn').textContent = '⏹ Stopping…'; document.getElementById('stopBulkBtn').disabled = true; }
+
+function markBulkDrafted() {
+  bulkGenerated.filter(e => e.drafted).forEach(e => {
+    const c = bulkContacts.find(c => c.email === e.to_email);
+    if (c) c.status = 'drafted';
+  });
+  renderBulkTable(); renderBulkStats();
+}
+
+function resetBulkRun() {
+  bulkGenerated = [];
+  document.getElementById('bulkProgress').style.display = 'none';
+  document.getElementById('bulkResults').style.display = 'none';
+  document.getElementById('bulkLog').innerHTML = '';
+  document.getElementById('bulkProgressFill').style.width = '0%';
+  document.getElementById('startBulkBtn').textContent = '⚡ Generate & Draft All';
+  document.getElementById('startBulkBtn').disabled = false;
+  renderBulkTable(); renderBulkStats();
+}
+
+function continueBulk() {
+  document.getElementById('bulkContinueBar').style.display = 'none';
+  document.getElementById('bulkResults').style.display = 'none';
+  document.getElementById('bulkProgress').style.display = 'none';
+  document.getElementById('bulkLog').innerHTML = '';
+  document.getElementById('bulkProgressFill').style.width = '0%';
+  document.getElementById('startBulkBtn').textContent = '⚡ Generate & Draft All';
+  document.getElementById('startBulkBtn').disabled = false;
+  renderBulkTable(); renderBulkStats();
+  document.getElementById('bulkConfigCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── History ────────────────────────────────────────────────────────────────
+function renderHistory() {
+  if (sessionHistory.length === 0) {
+    document.getElementById('historyContent').innerHTML = `
+      <div style="text-align:center;padding:60px 20px;color:var(--muted);">
+        <div style="font-size:48px;margin-bottom:12px;opacity:0.3;">📋</div>
+        <div style="font-size:15px;">No emails generated yet this session</div>
+      </div>`;
+    return;
+  }
+  document.getElementById('historyContent').innerHTML = `
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">${sessionHistory.length} email${sessionHistory.length!==1?'s':''} generated this session</div>` +
+    sessionHistory.map((e, i) => renderEmailPreview(e, e.angle, false, i)).join('');
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>

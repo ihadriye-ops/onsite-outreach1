@@ -1,0 +1,6 @@
+{
+  "name": "onsite-outreach",
+  "version": "1.0.0",
+  "description": "Onsite Support Sales Outreach Tool",
+  "engines": { "node": "18.x" }
+}
